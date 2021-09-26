@@ -1,1 +1,1 @@
-# HKproge2
+# Programmeerimine II tunnitööd
