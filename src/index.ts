@@ -1,8 +1,12 @@
 import express, { Request, Response, Application } from 'express';
+import db from './db';
+import usersController from './components/users/controller';
+import logger from './components/loggerMiddleware';
 
 const app: Application = express();
 const port: number = 3000;
 app.use(express.json());
+app.use(logger);
 
 
 interface User {
@@ -17,22 +21,6 @@ interface Db {
 };
   
 
-const db: Db = { 
-    users: [
-    {
-      id: 1,
-      firstName: 'Taaniel',
-      lastName: 'Typescript',
-    },
-    {
-      id: 2,
-      firstName: 'Peeter',
-      lastName: 'Python',
-    }
-  ]
-};
-
-
 app.get('/api', (req: Request, res: Response) => {
     res.status(200).json({
         message: 'Hello world!',
@@ -40,82 +28,19 @@ app.get('/api', (req: Request, res: Response) => {
 });
 
 
-app.get('/users', (req: Request, res: Response) => {
-    res.status(200).json({
-        users: db.users,
-    });
-});
+app.get('/users', usersController.getAllUsers);
 
 
-app.get('/users/:id', (req: Request, res: Response) => {
-    const id: number = parseInt(req.params.id);
-    const user = db.users.find((element) => element.id === id);
-    res.status(200).json({
-      user,
-    });
-});
+app.get('/users/:id', usersController.getUserById);
 
 
-app.post('/users', (req: Request, res: Response) => {
-    const { firstName, lastName } = req.body;
-    const id = db.users.length + 1;
-    db.users.push({
-        id,
-        firstName,
-        lastName,
-    });
-    res.status(201).json({
-        id,
-        users: db.users,
-    });
-});
+app.post('/users', usersController.createUser);
 
 
-app.delete('/users/:id', (req: Request, res: Response) => {
-    const id: number = parseInt(req.params.id, 10);
-    if (!id) {
-      return res.status(400).json({
-        error: 'No valid id provided',
-      });
-    }
-    const index = db.users.findIndex((element) => element.id === id);
-    if (index < 0) {
-      return res.status(400).json({
-        message: `User not found with id: ${id}`,
-      });
-    }
-    db.users.splice(index, 1);
-    return res.status(204).send();
-});
+app.delete('/users/:id', usersController.removeUser);
 
 
-app.patch('/users/:id', (req: Request, res: Response) => {
-    const id: number = parseInt(req.params.id, 10);
-    const { firstName, lastName } = req.body;
-    if (!id) {
-      return res.status(400).json({
-        error: 'No valid id provided',
-      });
-    }
-    if (!firstName && !lastName) {
-      return res.status(400).json({
-        error: 'Nothing to update',
-      });
-    }
-    const index = db.users.findIndex((element) => element.id === id);
-    if (index < 0) {
-      return res.status(400).json({
-        error: `No user found with id: ${id}`,
-      });
-    }
-    if (firstName) {
-      db.users[index].firstName = firstName;
-    }
-    if (lastName) {
-      db.users[index].lastName = lastName;
-    }
-    return res.status(204).send();
-});
+app.patch('/users/:id', usersController.updateUser);
 
   
 app.listen(port, () => {
