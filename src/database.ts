@@ -7,7 +7,7 @@ createConnection({
   host: 'localhost',
   port: 3306,
   username: 'root',
-  password: 'Zyxel660H',
+  password: '',
   database: 'excuses',
   entities: [eUser],
   synchronize: true,
